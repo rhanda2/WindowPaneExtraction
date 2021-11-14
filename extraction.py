@@ -31,5 +31,5 @@ class Extractor(object):
         """
         self.interactive = interactive
         self.MIN_WINDOW_AREA_RATIO = MIN_WINDOW_AREA_RATIO
-        self.MAX_QUAD_ANGLE_RANGE = MAX_ANGLE_RANGE
+        self.MAX_ANGLE_RANGE = MAX_ANGLE_RANGE
 
