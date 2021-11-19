@@ -116,7 +116,7 @@ class Extractor(object):
             # find the vertical lines (connected-components -> bounding boxes -> final lines)
             (contours, hierarchy) = cv2.findContours(vertical_lines_canvas, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
             contours = sorted(contours, key=lambda c: cv2.arcLength(c, True), reverse=True)[:2]
-            vertical_lines_canvas = np.zeros(img.shape, dtype=np.uint8)
+            vertical_lines_canvas = np.zeros(img.shape, dtype=np.uint8).tolist()
             for contour in contours:
                 contour = contour.reshape((contour.shape[0], contour.shape[2]))
                 min_y = np.amin(contour[:, 1], axis=0) + 2
