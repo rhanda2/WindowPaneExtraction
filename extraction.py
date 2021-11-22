@@ -240,7 +240,7 @@ class Extractor(object):
     def scan(self, image_path):
 
         RESCALED_HEIGHT = 500.0
-        OUTPUT_DIR = ''
+        OUTPUT_DIR = 'output'
 
         # load the image and compute the ratio of the old height
         # to the new height, clone it, and resize it
@@ -273,8 +273,7 @@ class Extractor(object):
 
         # save the transformed image
         basename = os.path.basename(image_path)
-        cv2.imwrite(basename, thresh)
-        print(OUTPUT_DIR + '/' + basename, thresh)
+        cv2.imwrite(OUTPUT_DIR + '/' + basename, thresh)
         print("Proccessed " + basename)
 
 if __name__ == "__main__":
