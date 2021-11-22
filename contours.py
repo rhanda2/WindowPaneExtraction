@@ -74,6 +74,9 @@ class PolygonInteractor:
         canvas.mpl_connect('motion_notify_event', self.on_mouse_move)
         self.canvas = canvas
 
+    def get_poly_points(self):
+        return np.asarray(self.poly.xy)
+
     def on_draw(self, event):
         self.background = self.canvas.copy_from_bbox(self.ax.bbox)
         self.ax.draw_artist(self.poly)
