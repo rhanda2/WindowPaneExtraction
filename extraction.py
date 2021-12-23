@@ -16,20 +16,17 @@ import os
 class Extractor(object):
     """This object extracts the window frame from the image"""
 
-    def __init__(self, interactive=True, MIN_WINDOW_AREA_RATIO=0.25, MAX_ANGLE_RANGE=40):
+    def __init__(self, MIN_WINDOW_AREA_RATIO=0.25, MAX_ANGLE_RANGE=25):
         """
-        Args:
-            interactive (boolean): If True, user can adjust screen contour before
-                transformation occurs in interactive pyplot window.
+        Args:            
             MIN_WINDOW_AREA_RATIO (float): A contour will be rejected if its corners
                 do not form a quadrilateral that covers at least MIN_WINDOW_AREA_RATIO
                 of the original image. Defaults to 0.25. Ensures that the window is
                 big enough in the photo
             MAX_ANGLE_RANGE (int):  A contour will also be rejected if the range
-                        of its interior angles exceeds MAX_ANGLE_RANGE. Defaults to 40.
+                        of its interior angles exceeds MAX_ANGLE_RANGE. Defaults to 25.
                         Checks if the photos is not too distorted.
-        """
-        self.interactive = interactive
+        """       
         self.MIN_WINDOW_AREA_RATIO = MIN_WINDOW_AREA_RATIO
         self.MAX_ANGLE_RANGE = MAX_ANGLE_RANGE
 
@@ -86,7 +83,7 @@ class Extractor(object):
             lines = lines.squeeze().astype(np.int32).tolist()
             horizontal_lines_canvas = np.zeros(img.shape, dtype=np.uint8)
             vertical_lines_canvas = np.zeros(img.shape, dtype=np.uint8)
-            thickness = 2
+            thickness = 4
             for line in lines:
                 x1, y1, x2, y2, _ = line
                 # uses relative change in vertical or horizontal directions to find the type of ine
@@ -255,8 +252,8 @@ class Extractor(object):
         # get the contour of the document
         screenCnt = self.get_contour(rescaled_image)
 
-        if self.interactive:
-            screenCnt = self.interactive_get_contour(screenCnt, rescaled_image)
+        
+        screenCnt = self.interactive_get_contour(screenCnt, rescaled_image)
 
         # apply the perspective transformation
         warped = transform.four_point_transform(orig, screenCnt * ratio)
@@ -266,13 +263,15 @@ class Extractor(object):
 
         # sharpen image
         sharpen = cv2.GaussianBlur(gray, (0, 0), 3)
-        sharpen = cv2.addWeighted(gray, 1.5, sharpen, -0.5, 0)
+        # sharpen = cv2.addWeighted(gray, 1.5, sharpen, -0.5, 0)
 
         # apply adaptive threshold to get black and white effect
-        thresh = cv2.adaptiveThreshold(sharpen, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 15)
+        # thresh = cv2.adaptiveThreshold(sharpen, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 15)
 
         # save the transformed image
         basename = os.path.basename(image_path)
-        cv2.imwrite(OUTPUT_DIR + '/' + basename, thresh)
+        cv2.imwrite(OUTPUT_DIR + '/' + basename, sharpen)
         print("Proccessed " + basename)
+
+        return sharpen
 
