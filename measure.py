@@ -6,6 +6,7 @@ import os
 import contours as poly_interactive
 import extraction
 from checkerboard import detect_checkerboard
+import reference_object
 
 def get_reference_corners(image):
     corners_list = []
@@ -39,28 +40,33 @@ def get_dist_two_points(point1, point2):
     return dist
 
 
-def get_reference_length(image_path):
-    # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+def get_reference_length(image_path, ref_obj=1):
+    reference = None
+    if ref_obj == 1:
+        reference = reference_object.get_ref_object_9x11()    
     image = cv2.imread(image_path)
-    # print(image == None)
-    # while(1):
-    # cv2.imshow('image', image)
-    print(image)
-    ret, corners = cv2.findChessboardCorners(image, (9, 7), None)
-    print('ret' + str(ret))
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    chessboard_flags = cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_FAST_CHECK + cv2.CALIB_CB_NORMALIZE_IMAGE
+    ret, corners2 = cv2.findChessboardCorners(gray, (reference.width,reference.length), chessboard_flags)
+    if ret == 0:
+        reference = reference_object.get_ref_object_9x11() 
+        ret, corners2 = cv2.findChessboardCorners(gray, (reference.width,reference.length), chessboard_flags)
+    print('ret ' + str(ret))
+    # print(len(corners[0]))
     # if ret:
     avg_horz = 0
     avg_virt = 0
     edges_horz = 0
     edges_virt = 0
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-    corners2 = cv2.cornerSubPix(image, corners, (11, 11), (-1, -1), criteria)
+    # criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+    # corners2 = cv2.cornerSubPix(image, corners, (11, 11), (-1, -1), criteria)
     for x in range(63):
-        if ((x + 1) % 5) != 0:
+        if ((x + 1) % 9) != 0:
             avg_virt += get_dist_two_points(corners2[x][0], corners2[x + 1][0])
             edges_virt += 1
         # if the point is in the row skip the comparison as there is no points on the left
-        if (x + 5) <= 14:
+        if (x + 9) <= 62:
             avg_horz += get_dist_two_points(corners2[x][0], corners2[x + 5][0])
             edges_horz += 1
     return (avg_horz / edges_horz), (avg_virt / edges_virt)
@@ -93,18 +99,12 @@ if __name__ == "__main__":
     basename = os.path.basename(im_file_path)
     extracted_img_path = 'output' + '/' + basename
     # image = cv2.imread()
-    x_ref, y_ref = get_reference_length(im_file_path)
+    x_ref, y_ref = get_reference_length(im_file_path, 1)
 
-    # print(x_ref)
-    # print(y_ref)
-    # print(x_ref == y_ref)
-    # height, width = extracted_img.shape
-    # print('Height ' + str(height))
-    # print('Width ' + str(width))
-    # Scan all valid images in directory specified by command line argument --images <IMAGE_DIR>
-    # else:
-    #     im_files = [f for f in os.listdir(im_dir) if get_ext(f) in valid_formats]
-    #     for im in im_files:
-    #         extractor.scan(im_dir + '/' + im)
-    
+    print(x_ref)
+    print(y_ref)
+    print(x_ref == y_ref)
+    height, width = extracted_img.shape
+    print('Height ' + str(height))
+    print('Width ' + str(width))
 
